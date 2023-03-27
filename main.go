@@ -1,5 +1,7 @@
 package main
 
+//http://localhost:8080/?command=inity;;11
+//http://localhost:8080/?command=
 import (
 	"errors"
 	"fmt"
@@ -92,25 +94,24 @@ func connectToRobosklad(message_to_websock string) string {
 	}()
 	////------
 	if message_to_websock != "" {
-		//for {
 
 		err := RoboskladWS_connection.WriteMessage(websocket.TextMessage, []byte(message_to_websock))
-		//err := RoboskladWS_connection.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, message_to_websock))
+
 		if err != nil {
 			log.Println("Write error:", err)
-			//	return message_fromRobosklad
+
 		}
 
 		closeProcessConnection()
+		//RoboskladWS_connection.Close()
 		return message_fromRobosklad
-		//}
+
 	} else {
-		//err := RoboskladWS_connection.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+
 		err := RoboskladWS_connection.WriteMessage(websocket.TextMessage, []byte(message_to_websock))
 		if err != nil {
 			log.Println("write close:", err)
-
-			//return message_fromRobosklad
+			//RoboskladWS_connection.Close()
 		}
 
 		closeProcessConnection()
