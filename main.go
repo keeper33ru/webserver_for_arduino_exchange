@@ -1,7 +1,5 @@
 package main
 
-//http://localhost:8080/?command=inity;;11
-//http://localhost:8080/?command=
 import (
 	"errors"
 	"fmt"
@@ -14,15 +12,17 @@ import (
 	"syscall"
 
 	"github.com/gorilla/websocket"
+	"golang.org/x/text/encoding/charmap"
 )
 
-var ROBOSKLAD_SERVER = "127.0.0.1:8001"
+// 10.10.15.100
+var ROBOSKLAD_SERVER = "10.10.15.100:8001"
 var PATH = ""
 
 func main() {
 
 	http.HandleFunc("/", incomingRequestHandler)
-	err := http.ListenAndServe(":8080", nil)
+	err := http.ListenAndServe(":8008", nil)
 	if errors.Is(err, http.ErrServerClosed) {
 		fmt.Printf("server closed sonnection\n")
 	} else if err != nil {
@@ -56,6 +56,12 @@ func incomingRequestHandler(responseWriter http.ResponseWriter, incomingRequest 
 
 	}
 
+}
+
+func EncodeWindows1251(ba []uint8) []uint8 {
+	enc := charmap.Windows1251.NewEncoder()
+	out, _ := enc.String(string(ba))
+	return []uint8(out)
 }
 
 func connectToRobosklad(message_to_websock string) string {
@@ -95,8 +101,12 @@ func connectToRobosklad(message_to_websock string) string {
 	////------
 	if message_to_websock != "" {
 
-		err := RoboskladWS_connection.WriteMessage(websocket.TextMessage, []byte(message_to_websock))
-
+		//err := RoboskladWS_connection.WriteMessage(websocket.TextMessage, []byte(message_to_websock))
+		//win := charset.Cp1251RunesToBytes([]rune(message_to_websock))
+		//err := RoboskladWS_connection.WriteJSON(win)
+		//err := RoboskladWS_connection.WriteMessage(websocket.TextMessage, []byte(message_to_websock))
+		win := EncodeWindows1251([]uint8(message_to_websock))
+		err := RoboskladWS_connection.WriteMessage(websocket.TextMessage, win)
 		if err != nil {
 			log.Println("Write error:", err)
 
@@ -108,7 +118,8 @@ func connectToRobosklad(message_to_websock string) string {
 
 	} else {
 
-		err := RoboskladWS_connection.WriteMessage(websocket.TextMessage, []byte(message_to_websock))
+		//err := RoboskladWS_connection.WriteMessage(websocket.TextMessage, []byte(message_to_websock))
+		err := RoboskladWS_connection.WriteMessage(websocket.PingMessage, []byte(message_to_websock))
 		if err != nil {
 			log.Println("write close:", err)
 			//RoboskladWS_connection.Close()
