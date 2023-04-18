@@ -33,7 +33,7 @@ func main() {
 }
 
 func incomingRequestHandler(responseWriter http.ResponseWriter, incomingRequest *http.Request) {
-	//fmt.Fprintf(responseWriter, "Hello World!")
+
 	fmt.Println("incoming request")
 
 	if incomingRequest.Method == "GET" {
@@ -42,9 +42,10 @@ func incomingRequestHandler(responseWriter http.ResponseWriter, incomingRequest 
 		var messageFromRobosklad = ""
 		if strings.Contains(rawCommand, "command=") {
 			command := strings.Replace(rawCommand, "command=", "", 1)
+			command_filtered := strings.Replace(command, "%20", " ", 1)
 			log.Printf("current command to robosklad = " + command) //current_command_toRobosklad[0])
 			//messageFromRobosklad := connectToRobosklad(current_command_toRobosklad[0])
-			messageFromRobosklad = connectToRobosklad(command) //current_command_toRobosklad[0])
+			messageFromRobosklad = connectToRobosklad(command_filtered) //current_command_toRobosklad[0])
 		} else {
 
 			log.Printf("current command to robosklad = " + strconv.Quote("")) //current_command_toRobosklad[0])
