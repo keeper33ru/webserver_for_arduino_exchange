@@ -33,17 +33,19 @@ func main() {
 }
 
 func incomingRequestHandler(responseWriter http.ResponseWriter, incomingRequest *http.Request) {
-
+	//var command_filtered = ""
 	fmt.Println("incoming request")
 
 	if incomingRequest.Method == "GET" {
 		//requestURIGetParams, err := url.Parse(incomingRequest.RequestURI)
 		rawCommand := incomingRequest.URL.RawQuery //.Query().Get("command")
 		var messageFromRobosklad = ""
+		fmt.Println("rawCommand" + " " + rawCommand)
 		if strings.Contains(rawCommand, "command=") {
 			command := strings.Replace(rawCommand, "command=", "", 1)
 			command_filtered := strings.Replace(command, "%20", " ", 1)
-			log.Printf("current command to robosklad = " + command) //current_command_toRobosklad[0])
+			//command_filtered2 := strings.Replace(command_filtered1, "%22", "", 1)
+			log.Printf("current command to robosklad = " + command_filtered) //current_command_toRobosklad[0])
 			//messageFromRobosklad := connectToRobosklad(current_command_toRobosklad[0])
 			messageFromRobosklad = connectToRobosklad(command_filtered) //current_command_toRobosklad[0])
 		} else {
@@ -86,16 +88,17 @@ func connectToRobosklad(message_to_websock string) string {
 	go func() {
 		defer close(done)
 
-		_, message, err := RoboskladWS_connection.ReadMessage()
-		if err != nil {
-			log.Println("ReadMessage() error:", err)
-			message_fromRobosklad = string(message)
-			//return message_fromRobosklad
-		} else {
+		// _, message, err := RoboskladWS_connection.ReadMessage()
+		// if err != nil {
+		// 	log.Println("ReadMessage() error:", err)
+		// 	message_fromRobosklad = string(message)
+		// 	//return message_fromRobosklad
+		// } else {
 
-			message_fromRobosklad = string(message)
-		}
-		log.Printf("Received: %s", message)
+		// 	message_fromRobosklad = string(message)
+		// }
+		//  log.Printf("Received: %s", message)
+		log.Println("Closing connection to ROBOSKLAD")
 		//return string(message)
 
 	}()
@@ -106,13 +109,24 @@ func connectToRobosklad(message_to_websock string) string {
 		//win := charset.Cp1251RunesToBytes([]rune(message_to_websock))
 		//err := RoboskladWS_connection.WriteJSON(win)
 		//err := RoboskladWS_connection.WriteMessage(websocket.TextMessage, []byte(message_to_websock))
-		win := EncodeWindows1251([]uint8(message_to_websock))
-		err := RoboskladWS_connection.WriteMessage(websocket.TextMessage, win)
+
+		//win := EncodeWindows1251([]uint8(message_to_websock))
+		//err := RoboskladWS_connection.WriteMessage(websocket.TextMessage, win)
+		err := RoboskladWS_connection.WriteMessage(websocket.TextMessage, []byte(message_to_websock))
 		if err != nil {
 			log.Println("Write error:", err)
 
 		}
+		_, message, err := RoboskladWS_connection.ReadMessage()
+		if err != nil {
+			log.Println("ReadMessage() error:", err)
+			message_fromRobosklad = string(message)
+			//return message_fromRobosklad
+		} else {
 
+			message_fromRobosklad = string(message)
+		}
+		log.Printf("Received: %s", message)
 		closeProcessConnection()
 		//RoboskladWS_connection.Close()
 		return message_fromRobosklad
@@ -125,6 +139,17 @@ func connectToRobosklad(message_to_websock string) string {
 			log.Println("write close:", err)
 			//RoboskladWS_connection.Close()
 		}
+
+		_, message, err := RoboskladWS_connection.ReadMessage()
+		if err != nil {
+			log.Println("ReadMessage() error:", err)
+			message_fromRobosklad = string(message)
+			//return message_fromRobosklad
+		} else {
+
+			message_fromRobosklad = string(message)
+		}
+		log.Printf("Received: %s", message)
 
 		closeProcessConnection()
 
